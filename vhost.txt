@@ -1,0 +1,49 @@
+=== VHOST ===
+copyright 2005 Scott Merrill (skippy@skippy.net)
+Tags: virtual, host, vhost
+Contributors: skippy, ringmaster, chrisjdavis
+
+This plugin binds a virtual host to a single WordPress category.  Each vhost+category pair can have its own title and description for use in templates.  This plugin assumes that each vhost+category will have its own template, with the directory name of the template equal to the virtual host being used.  For example, virtual host http://foo.bar.com/ expects the template /wp-content/themes/foo.bar.com/ to exist.  These template directories can be symlinks.
+
+You may log into the WordPress admin area by way of a vhost, instead of the blog's main URI.  If you do so, you will only be able to post new items to that vhost's category.
+
+Additionally, blog administrators can edit a registered user's profile, and set the URL in that user's profile to the fully-qualified domain name of a valid vhost.  That user may then login to http://vhost/wp-admin/ and post <em>only</em> in that vhost's category.  If that user attempts to access the /wp-admin/ directory on the main blog, they will be redirected to their vhost.
+
+== INSTALLATION ==
+Extract the file into your wp-content/plugins directory. Activate the plugin.
+
+Edit your categories, naming categories after virtual hosts, as desired.  A category named "foo.bar.com" will be bound to virtual host http://foo.bar.com, and will use the wp-content/themes/foo.bar.com/ directory for its theme.
+
+To supply a custom name for this vhost, enter the new name in the "Category Description" field.  Follow this with a newline, and an optional descrption.  For example, the following category description:
+     Foo Bar
+     Not quite Baz
+Will use "Foo Bar" for all instances of the blog name, and "Not quite Baz" for all instances of the blog description (or tagline).  This allows you to tailor your templates appropriately.
+
+== EDIT YOUR TEMPLATES ==
+For each vhost+category, you probably want to constrain post navigation to that vhost+category.  Edit (or create) the single.php template, and update the post navigation links as such:
+     <?php previous_post_link('&laquo; %link','%title','yes'); ?>
+     <?php next_post_link('%link &raquo;','%title','yes'); ?>
+The third argument, "yes", tells the navigation controls to stay inside the current category.  Since the category is bound to the virtual host, this ensures that visitors navigate inside your vhost+category.
+
+== CAVEATS ==
+* vhost+category pairs cannot have sub-categories.
+* The previous_post_link() and next_post_link() functions _require_ WordPress 1.5.1 or above.  Prior versions will not work correctly.  See here for the specific changes:
+     http://trac.wordpress.org/changeset/2542
+
+== FREQUENTLY ASKED QUESTIONS ==
+Q. What would I use this for?
+A. You could have a sub-domain for all your digital photos, for example photos.bar.com.  Create a new category, "photos.bar.com", and create a theme for your photos.  Then you can host your own photoblog without requiring an additional installation of WordPress (or some other product).
+
+Q. Can this be used to create a multi-user blog, providing each user their own category?
+A. Yes!  The blog admin must edit the user's profile, and define the user's URL as one of the blog's valid vhosts. If the user then attempts to log in via the main blog, they will be redirected to the admin panel under their virtual host, which in turn restricts the user to posting in only their category.
+
+Q. How do I make a virtual host?
+A. This is way beyond the scope of this plugin.  If you're using a hosting provider, you should ask them.
+
+If you host your own domain, first create a new DNS record for the vhost you want.  Then, in your Apache configuration, enter a line like the following:
+     ServerAlias foo.bar.com
+inside the block defining your main site.  If you use IIS, I can't help you.
+
+Q. Do I have to use sub-domains?  I want to use photoskippy.net for my photoblog, but skippy.net for my main blog.
+A. You can use sub-domains or top-level domains.  It shouldn't matter.
+
